@@ -4,8 +4,23 @@ import App from './App';
 import './index.css';
 import registerServiceWorker from './registerServiceWorker';
 
+const rootEl = document.getElementById('root');
+
+declare var module: any;
+
 ReactDOM.render(
   <App />,
-  document.getElementById('root') as HTMLElement
+  rootEl as HTMLElement,
 );
+
+if (module.hot) {
+  module.hot.accept('./App', () => {
+    const NextApp = require('./App').default;
+    ReactDOM.render(
+      <NextApp />,
+      rootEl,
+    );
+  })
+}
+
 registerServiceWorker();

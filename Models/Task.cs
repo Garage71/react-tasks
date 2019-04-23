@@ -18,5 +18,9 @@ namespace react_todo.Models
         public string Description { get; set; }
         [JsonProperty("dateTimeToComplete")]
         public DateTime DateTimeToComplete { get; set; }
+        [JsonProperty("addedOn")]
+        public DateTime DateTimeAddedOn { get; set; }
+        [JsonProperty("isActive")]
+        public bool IsActive { get; set; }
     }
 }
