@@ -26,15 +26,27 @@ namespace react_todo.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task Create(Models.Task task)
+        public async Task<Models.Task> Create(Models.Task task)
         {
-            await _repository.CreateTask(task);
+            return await _repository.CreateTask(task);
         }
 
         [HttpGet("[action]")]
-        public async Task<Models.Task> GetTask(int iD)
+        public async Task<Models.Task> GetTask(Models.TaskId taskId)
         {
-            return await _repository.GetTask(iD);
+            return await _repository.GetTask(taskId.Id);
+        }
+
+        [HttpPut("[action]")]
+        public async Task<bool> CompleteTask(Models.TaskId taskId)
+        {
+            return await _repository.CompleteTask(taskId.Id);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<bool> RemoveTask(Models.TaskId taskId)
+        {
+            return await _repository.RemoveTask(taskId.Id);
         }
     }
 }

@@ -1,0 +1,234 @@
+import { Button, FormControl, Input, InputLabel, Paper, Theme, withStyles } from '@material-ui/core';
+import { DateTimePicker } from 'material-ui-pickers';
+import * as React from 'react';
+import { connect } from 'react-redux';
+import RichTextEditor, { EditorValue } from 'react-rte';
+import { bindActionCreators, Dispatch} from 'redux';
+import * as ActionCreators from 'src/redux-infrastucture/actions/actions';
+import { ITask } from 'src/redux-infrastucture/store/tasksState';
+
+
+interface IAddNewTaskProps {
+  submit: (task: ITask) => void;
+  classes?: any;
+}
+
+interface IAddNewTaskState {
+  editorValue: EditorValue;
+  task: ITask;
+  canSubmit: boolean;
+}
+
+export class AddNewTask extends React.Component<IAddNewTaskProps, IAddNewTaskState> {  
+
+  private now = new Date();
+
+  constructor(props: IAddNewTaskProps) {
+    super(props);
+    const finishDate = this.getFinishTime(this.now);
+    this.state = { 
+      editorValue: RichTextEditor.createEmptyValue(),
+      task: {
+        addedOn: this.now,
+        taskId: 0,
+        dateTimeToComplete: finishDate,
+        isActive: true,
+        description: '',
+        priority: 100,
+        name: 'New task',
+      },
+      canSubmit: true,
+    };
+    this.setExpiration();
+  }
+
+  private getFinishTime = (dateTime: Date) : Date => {
+    const finishDate = new Date(dateTime);
+    finishDate.setMinutes(dateTime.getMinutes() + 1);
+    return finishDate;
+  }
+
+  private setExpiration = () => {
+    setTimeout(() => {
+      if(this.state.task.dateTimeToComplete < new Date()) {
+        this.setState({
+          canSubmit: false,
+        });
+      }
+    }, 61000);
+  }
+
+  private handleNameChanged = (event: any) => {
+    const { value } = event.target;
+    const { task } = this.state;
+    this.setState({
+      task: {
+        ...task,
+        name: value,
+      }
+    });
+    this.setState({
+      canSubmit: !!value,
+    })
+  }
+
+  private handlePriorityChanged = (event: any) => {
+    const { value } = event.target;
+    if (!value) {
+      return;
+    }
+    const { task } = this.state;
+    this.setState({
+      task: {
+        ...task,
+        priority: value,
+      }
+    });
+  }
+
+  private handleSubmit = () => {
+    this.props.submit(this.state.task);
+  }
+
+  private handleTimeChanged = (date: Date) => {
+    const { task } = this.state;
+    if(date < new Date()) {
+      this.setState({
+        canSubmit: false,
+      });
+      return;
+    }
+
+    this.setState({
+      task: {
+        ...task,
+        dateTimeToComplete: date,
+      }
+    });
+  }
+
+  private onDescriptionChanged = (value: EditorValue) => {
+    const { task } = this.state;
+    this.setState({editorValue: value});
+    const html = value.toString('html');
+    this.setState({
+      task: {
+        ...task,
+        description: html,
+      }
+    });
+  };
+  
+  public render () {
+    const { classes } = this.props;
+    return (
+      <div className={classes.container}>
+                <Paper className={classes.paper}>
+                    <h2>{'Add new task'}</h2>
+                    <FormControl 
+                        required={true} fullWidth={true} className={classes.field}>
+                        <InputLabel>Task Name</InputLabel>
+                        <Input
+                            required={true}
+                            placeholder={'Enter task name'}
+                            value={this.state.task.name}
+                            onChange={this.handleNameChanged}
+                            id="name"
+                        />
+                    </FormControl>
+                    <FormControl required={true} fullWidth={true} className={classes.field}>
+                        <InputLabel>Piority</InputLabel>
+                        <Input
+                            value={this.state.task.priority}
+                            type={'number'}
+                            onChange={this.handlePriorityChanged}
+                            id="priority"
+                        />
+                    </FormControl>
+                    <div className={classes.picker}>
+                        <br/>
+                        <InputLabel>End date*</InputLabel>
+                        <DateTimePicker 
+                          value={this.state.task.dateTimeToComplete}
+                          onChange={this.handleTimeChanged}
+                          format={"DD-MM-YYYY HH:mm"}
+                          minDate={this.now}
+                          minDateMessage={"Finish date cannot be set in past"}
+                        />
+                    </div>
+                    <div>
+                      <br/>
+                      <InputLabel>Description</InputLabel>
+                      <RichTextEditor
+                        className={classes.RichTextEditor}
+                        value={this.state.editorValue}
+                        onChange={this.onDescriptionChanged}
+                        placeholder={'Enter description'}
+                        autoFocus={true}
+                      />
+                    </div>
+                    <div className={classes.actions}>
+                        <Button
+                            onClick={this.handleSubmit}
+                            variant="contained"
+                            color="primary"
+                            className={classes.button}
+                            disabled={!this.state.canSubmit}>
+                            Add new task
+                        </Button>
+                    </div>
+                </Paper>
+            </div>
+    );
+  }
+}
+
+const styles = (theme: Theme) => ({
+  container: {
+      display: 'flex',
+      justifyContent: 'left',
+      minHeight: 500,
+  },
+  paper: theme.mixins.gutters({
+      paddingTop: 16,
+      paddingBottom: 16,
+      marginTop: theme.spacing.unit * 3,
+      width: '30%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignContent: 'left',
+      [theme.breakpoints.down('md')]: {
+          width: '100%',
+      },
+  }),
+  field: {
+      marginTop: theme.spacing.unit * 3
+  },
+  actions: {
+      paddingTop: 16,
+      paddingBottom: 16,
+      paddingLeft: 0,
+  },
+  button: {
+      marginRight: theme.spacing.unit
+  },
+  RichTextEditor: {
+    height: 300,
+  },
+  picker: {
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    justifyContent: 'center',
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 16,
+  },
+});
+
+const mapDispatchToProps = (dispatch: Dispatch) =>
+  bindActionCreators({
+    submit: ActionCreators.addNewTaskRequest,
+    }, dispatch);
+
+export default connect(null, mapDispatchToProps)(withStyles(styles as any, { withTheme: true })(AddNewTask as any));

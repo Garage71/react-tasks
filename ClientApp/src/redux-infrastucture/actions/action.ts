@@ -1,13 +1,9 @@
 export interface IAction<T = {}> {
-    type: ActionType;
+    type: string;
     payload?: T;
   }
 
 export class Action<T = {}> implements IAction<T> {
-    public type: ActionType;
+    public type: string;
     public payload?: T;
   }
-
-  export enum ActionType {
-    GET_TASKS,    
-}

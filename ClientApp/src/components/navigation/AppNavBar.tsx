@@ -17,8 +17,8 @@ import { Route, withRouter } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 import { IApiState } from 'src/redux-infrastucture/store/apiState';
 import { IState } from 'src/redux-infrastucture/store/state';
-import MyEditor from '../editor/Editor';
-import SmartTable from '../table/SmartTable';
+import AddNewTask from '../form/AddNewTask';
+import SmartTable from '../table/TasksTable';
 
 interface IAppDrawerProps {
     api: IApiState;
@@ -29,8 +29,8 @@ class DrawerWithNavigation extends React.Component<IAppDrawerProps> {
 
 
     private routes = [
-        { path: '/tasks', title: 'Tasks', icon: () => <TableChart/> },
-        { path: '/addtask', title: 'Editor', icon: () => <AddComment/> },        
+        { path: '/tasks', title: 'Task list', icon: () => <TableChart/> },
+        { path: '/addtask', title: 'Add new task', icon: () => <AddComment/> },        
     ];
 
     private highlightItem  = (route: string, pathname: string) : boolean => {
@@ -57,17 +57,17 @@ class DrawerWithNavigation extends React.Component<IAppDrawerProps> {
             <AppBar position="fixed" className={classes.appBar}>
             <Toolbar>
                 <Typography variant="h6" color="inherit" noWrap={true}>
-                Permanent drawer
+                    React tasks app
                 </Typography>
             </Toolbar>
             </AppBar>
             <Drawer
-            className={classes.drawer}
-            variant="permanent"
-            classes={{
-                paper: classes.drawerPaper,
-            }}
-            anchor="left"
+                className={classes.drawer}
+                variant="permanent"
+                classes={{
+                    paper: classes.drawerPaper,
+                }}
+                anchor="left"
             >
                 <div className={classes.toolbar} />
                 <Divider />
@@ -87,7 +87,7 @@ class DrawerWithNavigation extends React.Component<IAppDrawerProps> {
                 <Route path='/' exact={true} component={SmartTable} />
                 <Route path='/tasks' exact={true} component={SmartTable} />
                 <Route path='/tasks/:id' exact={true} render={(props) => <SmartTable {...props} isAuthed={true} />} />
-                <Route path='/addtask' exact={true} component={MyEditor} />
+                <Route path='/addtask' exact={true} component={AddNewTask} />
             </main>
         </div>);
     };    

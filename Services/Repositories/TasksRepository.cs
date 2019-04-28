@@ -28,12 +28,13 @@ namespace react_todo.Services.Repositories
             return result;
         }
 
-        public async System.Threading.Tasks.Task CreateTask(Task task)
+        public async Task<Task> CreateTask(Task task)
         {
             using (var context = ContextFactory.CreateDbContext(ConnectionString))
             {
-                context.Tasks.Add(task);
-                await context.SaveChangesAsync();
+                var newTask = context.Tasks.Add(task);
+                var result = await context.SaveChangesAsync();
+                return task;
             }
         }
 
@@ -44,5 +45,36 @@ namespace react_todo.Services.Repositories
                 return await context.Tasks.FindAsync(taskId);
             }
         }
+
+        public async Task<bool> CompleteTask(int taskId)
+        {
+            using (var context = ContextFactory.CreateDbContext(ConnectionString))
+            {
+                var task = await context.Tasks.FindAsync(taskId);
+                if (task != null)
+                {
+                    task.IsActive = false;
+                    await context.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveTask(int taskId)
+        {
+            using (var context = ContextFactory.CreateDbContext(ConnectionString))
+            {
+                var task = await context.Tasks.FindAsync(taskId);
+                if (task != null)
+                {
+                    context.Tasks.Remove(task);
+                    await context.SaveChangesAsync();
+                    return true;
+                }
+                return false;
+            }
+        }
+
     }
 }

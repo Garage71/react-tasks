@@ -9,7 +9,10 @@ namespace react_todo.Contracts
     public interface ITasksRepository
     {
         Task<List<Task>> GetTasks();
-        System.Threading.Tasks.Task CreateTask(Task task);
+        Task<Task> CreateTask(Task task);
         Task<Task> GetTask(int taskId);
+
+        Task<bool> CompleteTask(int taskId);
+        Task<bool> RemoveTask(int taskId);
     }
 }

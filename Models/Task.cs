@@ -8,7 +8,6 @@ namespace react_todo.Models
 {
     public class Task
     {
-        [JsonIgnore]
         public int TaskId { get; set; }
         [JsonProperty("priority")]
         public int Priority { get; set; }
