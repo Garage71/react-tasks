@@ -12,9 +12,9 @@ import store from './redux-infrastucture/store';
 const theme = createMuiTheme({
   palette: {
     primary: blue,
-    secondary: grey
-  }
-})
+    secondary: grey,
+  },
+});
 
 class App extends React.Component {
   public render() {

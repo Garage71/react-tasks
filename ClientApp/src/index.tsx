@@ -10,7 +10,7 @@ declare var module: any;
 
 ReactDOM.render(
   <App />,
-  rootEl as HTMLElement,
+  rootEl as HTMLElement
 );
 
 if (module.hot) {
@@ -18,9 +18,9 @@ if (module.hot) {
     const NextApp = require('./App').default;
     ReactDOM.render(
       <NextApp />,
-      rootEl,
+      rootEl
     );
-  })
+  });
 }
 
 registerServiceWorker();

@@ -31,7 +31,7 @@ export const completeTask = async(taskId: number): Promise<any> => {
       const requestPayload = {
         taskId,
       };
-      const response = await axios.put<any>('api/task/completetask', requestPayload)
+      const response = await axios.put<any>('api/task/completetask', requestPayload);
       if (!response.status) {
         return { error: new Error('Failure') };
       }
@@ -39,7 +39,7 @@ export const completeTask = async(taskId: number): Promise<any> => {
     } catch (e) {
       return { error: e };
     }
-}
+};
 
 export const removeTask = async(taskId: number): Promise<any> => {
     try {
@@ -54,4 +54,4 @@ export const removeTask = async(taskId: number): Promise<any> => {
     } catch (e) {
       return { error: e };
     }
-}
+};

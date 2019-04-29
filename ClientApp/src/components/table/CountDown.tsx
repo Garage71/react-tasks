@@ -24,7 +24,7 @@ export default class CountDown extends React.Component<ICountDownProps, ICountDo
       super(props);
       this.state = {
           timeLeft: this.props.isActive? 60 : 0,
-        }
+        };
     }
 
     private timer () {
@@ -40,7 +40,7 @@ export default class CountDown extends React.Component<ICountDownProps, ICountDo
         if(timeLeft >= 1) {
             this.setState({
                 timeLeft,
-            })
+            });
         }
         
         if(timeLeft < 1) {

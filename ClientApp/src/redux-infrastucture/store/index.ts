@@ -12,14 +12,14 @@ const composeEnhancers =
 const sagaMiddleware = createSagaMiddleware();
 
 const middlewares: Middleware[] = [sagaMiddleware];
-const appliedMiddleware = applyMiddleware(...middlewares)
+const appliedMiddleware = applyMiddleware(...middlewares);
 
 const enhancer = composeEnhancers(appliedMiddleware);
 
 const store = createStore(
     rootReducer,
     initialState as any,
-    enhancer,
+    enhancer
 );
 
 sagaMiddleware.run(sagas as any);

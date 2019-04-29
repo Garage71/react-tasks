@@ -90,12 +90,12 @@ class DrawerWithNavigation extends React.Component<IAppDrawerProps> {
                 <Route path='/addtask' exact={true} component={AddNewTask} />
             </main>
         </div>);
-    };    
+    }
 }
 
 
 const mapStateToProps = (state: IState): IAppDrawerProps => ({
-    api: state.api
+    api: state.api,
 });
   
 

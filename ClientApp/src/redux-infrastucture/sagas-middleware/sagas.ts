@@ -14,14 +14,14 @@ function* getTasks () {
 function* addNewTask (action: Action<ITask>) {
     const { payload } = action;
     const result = yield call(api.createTask, payload as ITask);
-    yield put(Actions.addNewTaskComplete(result.data))
+    yield put(Actions.addNewTaskComplete(result.data));
     return result;
 }
 
 function* completeTask (action: Action<number>) {
     const { payload } = action;
     const result = yield call(api.completeTask, payload as number);
-    yield put(Actions.completeTaskComplete(payload as number))
+    yield put(Actions.completeTaskComplete(payload as number));
     return result;
 }
 

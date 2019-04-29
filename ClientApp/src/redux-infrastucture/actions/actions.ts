@@ -4,7 +4,7 @@ import * as ActionType from './actionTypes';
 
 export const getTasks = (): Action => {
     return {
-        type: ActionType.GET_TASKS_REQUEST
+        type: ActionType.GET_TASKS_REQUEST,
     };
 };
 
@@ -48,11 +48,11 @@ export const removeTaskRequest = (payload: number) : Action<number> => {
         type: ActionType.REMOVE_TASK_REQUEST,
         payload,
     };
-}
+};
 
 export const removeTaskComplete = (payload: number) : Action => {
     return {
         type: ActionType.REMOVE_TASK_COMPLETE,
         payload,
     };
-}
+};

@@ -1,4 +1,4 @@
-import { Action } from '../actions/action'
+import { Action } from '../actions/action';
 import * as ActionType from '../actions/actionTypes';
 import { initialState } from '../store/initialState';
 import { IState } from '../store/state';
@@ -58,4 +58,4 @@ export default (state: IState, action: Action): IState => {
         default:
             return initialState;
     }
-}
+};
