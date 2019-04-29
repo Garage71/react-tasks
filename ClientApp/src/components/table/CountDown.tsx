@@ -9,7 +9,8 @@ const WEEK = 604800;
 interface ICountDownProps {
     timeToFinish: moment.Moment;
     taskId: number;
-    completeTask: (taskId: number) => void;
+    completeTaskAction: (taskId: number) => void;
+    completeSelectedTask: (taskId: number) => void;
     isActive: boolean;
 }
 
@@ -22,15 +23,18 @@ export default class CountDown extends React.Component<ICountDownProps, ICountDo
 
     constructor(props: ICountDownProps) {
       super(props);
-      this.state = {
-          timeLeft: this.props.isActive? 60 : 0,
-        };
+    }
+
+    private getTimeLeft = () => {
+        const { timeToFinish } = this.props;
+        const now = moment();
+        const timeLeft = timeToFinish.diff(now, 'seconds');
+        return timeLeft;
     }
 
     private timer () {
-        const {timeToFinish, isActive} = this.props;
-        const now = moment();
-        const timeLeft = timeToFinish.diff(now, 'seconds');
+        const { isActive, taskId } = this.props;
+        const timeLeft = this.getTimeLeft();
         if(!isActive) {
             this.setState({
                 timeLeft: 0,
@@ -48,13 +52,16 @@ export default class CountDown extends React.Component<ICountDownProps, ICountDo
                 timeLeft: 0,
             });
             clearInterval(this.intervalId);
-            this.props.completeTask(this.props.taskId);
+            this.props.completeTaskAction(taskId);
+            this.props.completeSelectedTask(taskId);
         }
-        
     }
 
     public componentDidMount() {
         if(this.props.isActive) {
+            this.setState({
+                timeLeft: this.getTimeLeft(),
+            });
             this.intervalId = setInterval(this.timer.bind(this), 1000);
         }
     }
@@ -67,29 +74,31 @@ export default class CountDown extends React.Component<ICountDownProps, ICountDo
     
 
     private processSeconds = () => {
-        let { timeLeft } = this.state;
-        const weeks = Math.floor(timeLeft / WEEK);
         let time = '';
-        if(weeks > 0) {
-            time = time + `${weeks} weeks `;
-            timeLeft = timeLeft - weeks * WEEK;
+        if(this.state) {
+            let { timeLeft } = this.state;
+            const weeks = Math.floor(timeLeft / WEEK);
+            if(weeks > 0) {
+                time = time + `${weeks} weeks `;
+                timeLeft = timeLeft - weeks * WEEK;
+            }
+            const days = Math.floor(timeLeft / DAY);
+            if(days > 0) {
+                time = time + `${days} days `;
+                timeLeft = timeLeft - days * DAY;
+            }
+            const hours = Math.floor( timeLeft / HOUR);
+            if(hours > 0) {
+                time = time + `${hours} hours `;
+                timeLeft = timeLeft - hours * HOUR;
+            }
+            const minutes = Math.floor(timeLeft / MINUTE);
+            if(minutes > 0) {
+                time = time + `${minutes} minutes `;
+                timeLeft = timeLeft - minutes * MINUTE;
+            }
+            time = time + `${timeLeft} seconds`;
         }
-        const days = Math.floor(timeLeft / DAY);
-        if(days > 0) {
-            time = time + `${days} days `;
-            timeLeft = timeLeft - days * DAY;
-        }
-        const hours = Math.floor( timeLeft / HOUR);
-        if(hours > 0) {
-            time = time + `${hours} hours `;
-            timeLeft = timeLeft - hours * HOUR;
-        }
-        const minutes = Math.floor(timeLeft / MINUTE);
-        if(minutes > 0) {
-            time = time + `${minutes} minutes `;
-            timeLeft = timeLeft - minutes * MINUTE;
-        }
-        time = time + `${timeLeft} seconds`;
         return (<span>{time}</span>);
     }
 

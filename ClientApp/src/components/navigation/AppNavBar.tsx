@@ -85,8 +85,8 @@ class DrawerWithNavigation extends React.Component<IAppDrawerProps> {
             <main className={classes.content}>
                 <div className={classes.toolbar} />
                 <Route path='/' exact={true} component={SmartTable} />
+                <Route path='/:id(\d+)' exact={true} component={SmartTable} />
                 <Route path='/tasks' exact={true} component={SmartTable} />
-                <Route path='/tasks/:id' exact={true} render={(props) => <SmartTable {...props} isAuthed={true} />} />
                 <Route path='/addtask' exact={true} component={AddNewTask} />
             </main>
         </div>);

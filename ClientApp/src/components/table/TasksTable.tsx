@@ -1,4 +1,5 @@
-import { Button, Grid, Paper, Theme, Typography, withStyles } from '@material-ui/core';
+import { Button, Grid, IconButton, Paper, Snackbar, Theme, Typography, withStyles } from '@material-ui/core';
+import Close from '@material-ui/icons/Close';
 import { Cell, Column, Table } from 'fixed-data-table-2';
 import 'fixed-data-table-2/dist/fixed-data-table.css';
 import moment from 'moment';
@@ -21,23 +22,51 @@ interface ISmartTableProps {
 }
 
 interface ISmartTableState {
-  selectedTask: ITask | null;
   filteredTasks: ITask[] | null;
+  selectedTaskId?: number | null;
+  selectedTask: ITask | null;
+  selectedtaskIsFound: boolean;
 }
 
 class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
   constructor(props: ISmartTableProps) {
     super(props);
       this.state = {
-        selectedTask: null,
         filteredTasks: null,
+        selectedTask: null,
+        selectedtaskIsFound: true,
     };
+  }
+
+  public static getDerivedStateFromProps(nextProps: ISmartTableProps, prevState: ISmartTableState) : ISmartTableState {
+    const { selectedTaskId , selectedTask } = prevState;
+    const tasksHash = nextProps.hashedTasks as object;
+    const hashIndexes = Object.keys(tasksHash);
+    if(selectedTaskId && !selectedTask && hashIndexes.length > 0) {
+      const hashedTask = tasksHash[selectedTaskId];
+      if(!hashedTask) {
+        return {
+          ...prevState,
+          selectedtaskIsFound: false,
+        };
+      } else {
+        return {
+          ...prevState,
+          selectedTask: hashedTask,
+        };
+      }
+    } else {
+      return prevState;
+    }
   }
 
   public componentDidMount() {
     const { id } = this.props.match.params;
     const { tasks } = this.props;
     console.log(`Task ID is ${id}`);
+    this.setState({
+      selectedTaskId: id, 
+    });
     if(tasks && !tasks.length ) {
         this.props.getTasks();
     }
@@ -48,14 +77,25 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
     const { filteredTasks } = this.state;
     const propsTasks = tasks as ITask[];
     const task = filteredTasks ? filteredTasks[rowIndex] : propsTasks[rowIndex];
-    this.setState({
-      selectedTask: task,
-    });
+    
+    window.location.assign(`/${task.taskId}`);
+  }
+
+  private completeSelectedTask = (taskId: number) => {
+    const { selectedTask } = this.state;
+    if(selectedTask) {
+      this.setState({
+        selectedTask: {
+          ...selectedTask,
+          isActive: false,
+        },
+      });
+    }
   }
 
   private actionClicked = (index: number) => {
     console.log(index);
-    const {selectedTask} = this.state;
+    const { selectedTask } = this.state;
     const { tasks } = this.props;
     if(tasks) {
       const task: ITask = tasks[index];
@@ -78,135 +118,170 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
     }
   }
 
-    public render(): JSX.Element {
-      const { classes, tasks } = this.props;
-      const { filteredTasks, selectedTask } = this.state;
-      const tasksList : ITask[] = filteredTasks ? filteredTasks : (tasks ? tasks : []);
-        
-      return (
-        <Paper className={classes.container}>
-          <Typography
-            variant={'h4'}
-            className={classes.tabel}
-          >
-            Task list
-          </Typography>
-          <br/>
-          <Table
-            rowHeight={50}
-            rowsCount={tasksList.length}
-            width={1086}
-            height={500}
-            headerHeight={50}
-            onRowClick={this.onRowClick}
-          >
-            <Column
-              header={<Cell>Name</Cell>}
-              cell={({rowIndex, ...props}) => (
-                <Cell {...props} className={classes.clickable}>
-                  {tasksList[rowIndex].name}
-                    </Cell>
-                )}
-              width={400}
-            />
-            <Column
-              header={<Cell>Priority</Cell>}
-              cell={({rowIndex, ...props}) => (
-                <Cell {...props} className={classes.priority}> {tasksList[rowIndex].priority} </Cell>
+  private closeSnackbar = () => {
+    this.setState({
+      selectedtaskIsFound: true,
+      selectedTaskId: null,
+    });
+  }
+
+  public render(): JSX.Element {
+    const { classes, tasks } = this.props;
+    const { filteredTasks, selectedTask } = this.state;
+    const tasksList : ITask[] = filteredTasks ? filteredTasks : (tasks ? tasks : []);
+      
+    return (
+      <Paper className={classes.container}>
+        <Typography
+          variant={'h4'}
+          className={classes.tabel}
+        >
+          Task list
+        </Typography>
+        <br/>
+        <Table
+          rowHeight={50}
+          rowsCount={tasksList.length}
+          width={1086}
+          height={500}
+          headerHeight={50}
+          onRowClick={this.onRowClick}
+        >
+          <Column
+            header={<Cell>Name</Cell>}
+            cell={({rowIndex, ...props}) => (
+              <Cell {...props} className={classes.clickable}>
+                {tasksList[rowIndex].name}
+                  </Cell>
               )}
-              width={70}
-            />
-            <Column
-              header={<Cell>Added</Cell>}
-              cell={({rowIndex, ...props}) => (
-                <Cell {...props} className={classes.clickable}> {
-                    moment(tasksList[rowIndex].addedOn).format('YYYY-MM-DD HH:mm:ss')
-                  }
-                </Cell>
-              )}
-              width={200}
-            />
-            <Column
-              header={<Cell>Time to complete</Cell>}
-              cell={({rowIndex, ...props}) => (
-                <Cell {...props} className={classes.clickable}>
-                  {tasksList[rowIndex].isActive ? 
-                    <CountDown
-                      completeTask={this.props.completeTask}
-                      taskId={tasksList[rowIndex].taskId}
-                      timeToFinish={moment(tasksList[rowIndex].dateTimeToComplete)}
-                      isActive={tasksList[rowIndex].isActive}
-                    />
-                  :
-                  <span>Completed</span>}
-                </Cell>
-              )}
-              width={200}
-            />
-            <Column
-              header={<Cell className={classes.actionButton}>Actions</Cell>}
-              cell={({rowIndex, ...props}) => {
-                const task = tasksList[rowIndex];
-                return(
-                  <Cell {...props} className={classes.actionButton}>
-                    <Button
-                      variant="contained"
-                      color={task.isActive ? "primary" : "secondary"}
-                      className={classes.button}
-                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        e.stopPropagation();
-                        this.actionClicked(rowIndex);}}
-                        id={rowIndex.toString()}
-                    >
-                      {task.isActive ? 'Complete' : 'Remove'}
-                    </Button>
-                  </Cell>);
-              }}
-              width={200}
-            />
-          </Table>
-          {selectedTask &&
-            <Paper className={classes.taskDetailsContainer}>
-              <Typography variant={'h5'} className={classes.taskDetailsHeader}>
-                Task Details
-              </Typography>
-              <Grid container={true} spacing={16}>
-                <Grid item={true} xs={2}>
-                  <span className={classes.taskLabel}>Name</span>
-                </Grid>
-                <Grid item={true} xs={10}>
-                  {selectedTask.name}
-                </Grid>
-                <Grid item={true} xs={2}>
-                  <span className={classes.taskLabel}>Description</span>
-                </Grid>
-                <Grid item={true} xs={10}>
-                  <div dangerouslySetInnerHTML={{__html: selectedTask.description}} />
-                </Grid>
-                <Grid item={true} xs={2}>
-                  <span className={classes.taskLabel}>Status</span>
-                </Grid>
-                <Grid item={true} xs={10}>
-                  {selectedTask.isActive ? 'Active' : 'Completed'}
-                </Grid>
-                <Grid item={true} xs={2}>
-                  <span className={classes.taskLabel}>Priority</span>
-                </Grid>
-                <Grid item={true} xs={10}>
-                  {selectedTask.priority}
-                </Grid>
-                <Grid item={true} xs={2}>
-                  <span className={classes.taskLabel}>Added</span>
-                </Grid>
-                <Grid item={true} xs={10}>
-                  {moment(selectedTask.addedOn).format('YYYY-MM-DD HH:mm:ss')}
-                </Grid>
+            width={400}
+          />
+          <Column
+            header={<Cell>Priority</Cell>}
+            cell={({rowIndex, ...props}) => (
+              <Cell {...props} className={classes.priority}> {tasksList[rowIndex].priority} </Cell>
+            )}
+            width={70}
+          />
+          <Column
+            header={<Cell>Added</Cell>}
+            cell={({rowIndex, ...props}) => (
+              <Cell {...props} className={classes.clickable}> {
+                  moment(tasksList[rowIndex].addedOn).format('YYYY-MM-DD HH:mm:ss')
+                }
+              </Cell>
+            )}
+            width={200}
+          />
+          <Column
+            header={<Cell>Time to complete</Cell>}
+            cell={({rowIndex, ...props}) => (
+              <Cell {...props} className={classes.clickable}>
+                {tasksList[rowIndex].isActive ? 
+                  <CountDown
+                    completeTaskAction={this.props.completeTask}
+                    taskId={tasksList[rowIndex].taskId}
+                    timeToFinish={moment(tasksList[rowIndex].dateTimeToComplete)}
+                    isActive={tasksList[rowIndex].isActive}
+                    completeSelectedTask={this.completeSelectedTask}
+                  />
+                :
+                <span>Completed</span>}
+              </Cell>
+            )}
+            width={200}
+          />
+          <Column
+            header={<Cell className={classes.actionButton}>Actions</Cell>}
+            cell={({rowIndex, ...props}) => {
+              const task = tasksList[rowIndex];
+              return(
+                <Cell {...props} className={classes.actionButton}>
+                  <Button
+                    variant="contained"
+                    color={task.isActive ? "primary" : "secondary"}
+                    className={classes.button}
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.stopPropagation();
+                      this.actionClicked(rowIndex);}}
+                      id={rowIndex.toString()}
+                  >
+                    {task.isActive ? 'Complete' : 'Remove'}
+                  </Button>
+                </Cell>);
+            }}
+            width={200}
+          />
+        </Table>
+        {selectedTask &&
+          <Paper className={classes.taskDetailsContainer}>
+            <Typography variant={'h5'} className={classes.taskDetailsHeader}>
+              Task Details
+            </Typography>
+            <Grid container={true} spacing={16}>
+              <Grid item={true} xs={2}>
+                <span className={classes.taskLabel}>Name</span>
               </Grid>
-            </Paper>
-          }
-        </Paper>
-      );
-    }
+              <Grid item={true} xs={10}>
+                {selectedTask.name}
+              </Grid>
+              <Grid item={true} xs={2}>
+                <span className={classes.taskLabel}>Description</span>
+              </Grid>
+              <Grid item={true} xs={10}>
+                <div dangerouslySetInnerHTML={{__html: selectedTask.description}} />
+              </Grid>
+              <Grid item={true} xs={2}>
+                <span className={classes.taskLabel}>Status</span>
+              </Grid>
+              <Grid item={true} xs={10}>
+                {selectedTask.isActive ? 'Active' : 'Completed'}
+              </Grid>
+              <Grid item={true} xs={2}>
+                <span className={classes.taskLabel}>Priority</span>
+              </Grid>
+              <Grid item={true} xs={10}>
+                {selectedTask.priority}
+              </Grid>
+              <Grid item={true} xs={2}>
+                <span className={classes.taskLabel}>Added</span>
+              </Grid>
+              <Grid item={true} xs={10}>
+                {moment(selectedTask.addedOn).format('YYYY-MM-DD HH:mm:ss')}
+              </Grid>
+            </Grid>
+          </Paper>
+        }
+        <Snackbar
+            key={new Date().getTime()}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            open={!this.state.selectedtaskIsFound}
+            autoHideDuration={6000}
+            onClose={this.closeSnackbar}
+            ContentProps={{
+              'aria-describedby': 'message-id',
+            }}
+            message={
+              <span id="message-id">{`Task ID '${this.state.selectedTaskId}' is not found`}</span>
+            }
+            action={
+              <IconButton
+                key="close"
+                aria-label="Close"
+                color="inherit"
+                className={classes.close}
+                onClick={this.closeSnackbar}
+              >
+                <Close />
+              </IconButton>
+            }
+        />      
+      </Paper>
+    );
+  }
 }
 
 const styles = (theme: Theme) => ({
