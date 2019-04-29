@@ -8,7 +8,7 @@ import { bindActionCreators, Dispatch} from 'redux';
 import * as ActionCreators from 'src/redux-infrastucture/actions/actions';
 import hashedTasks from 'src/redux-infrastucture/selectors/selectors';
 import { ITask } from 'src/redux-infrastucture/store/tasksState';
-
+import CountDown from './CountDown';
 
 interface ISmartTableProps {    
     classes?: any;
@@ -29,8 +29,11 @@ class TasksTable extends React.Component<ISmartTableProps> {
 
     public componentDidMount() {
         const { id } = this.props.match.params;
+        const { tasks } = this.props;
         console.log(`Task ID is ${id}`)
-        this.props.getTasks();
+        if(tasks && !tasks.length ) {
+            this.props.getTasks();
+        }
     }
     
     private onRowClick = (e: React.SyntheticEvent<Table>, rowIndex: number) => {
@@ -49,14 +52,6 @@ class TasksTable extends React.Component<ISmartTableProps> {
             }
         }
     };
-    /*
-    private actionClicked = (e: React.MouseEvent<HTMLButtonElement>) => {
-        const button = e.target as HTMLElement;
-        e.stopPropagation();
-        console.log(button.id);
-    };
-    */
-
 
 
     public render(): JSX.Element {
@@ -75,7 +70,9 @@ class TasksTable extends React.Component<ISmartTableProps> {
                 <Column
                     header={<Cell>Name</Cell>}
                     cell={({rowIndex, ...props}) => (
-                        <Cell {...props}> {tasksList[rowIndex].name} </Cell>
+                        <Cell {...props} className={classes.clickable}>
+                            {tasksList[rowIndex].name}
+                        </Cell>
                     )}
                     width={400}
                 />
@@ -89,8 +86,8 @@ class TasksTable extends React.Component<ISmartTableProps> {
                 <Column
                     header={<Cell>Added</Cell>}
                     cell={({rowIndex, ...props}) => (
-                        <Cell {...props}> {
-                            moment(tasksList[rowIndex].addedOn).format('YYYY-MM-DD HH:MM:SS')
+                        <Cell {...props} className={classes.clickable}> {
+                            moment(tasksList[rowIndex].addedOn).format('YYYY-MM-DD HH:mm:ss')
                         } </Cell>
                     )}
                     width={200}
@@ -98,7 +95,17 @@ class TasksTable extends React.Component<ISmartTableProps> {
                 <Column
                     header={<Cell>Time to complete</Cell>}
                     cell={({rowIndex, ...props}) => (
-                        <Cell {...props}> {tasksList[rowIndex].dateTimeToComplete} </Cell>
+                        <Cell {...props} className={classes.clickable}>
+                            {tasksList[rowIndex].isActive ? 
+                                <CountDown
+                                    completeTask={this.props.completeTask}
+                                    taskId={tasksList[rowIndex].taskId}
+                                    timeToFinish={moment(tasksList[rowIndex].dateTimeToComplete)}
+                                    isActive={tasksList[rowIndex].isActive}
+                                />
+                            :
+                            <span>Completed</span>}
+                        </Cell>
                     )}
                     width={200}
                 />
@@ -134,11 +141,15 @@ const styles = (theme: Theme) => ({
     },
     priority: {
         textAlign: 'right',
+        cursor: 'pointer',
     },
     actionButton: {
         display: 'flex',
         flexDirection: 'row' as 'row',
         justifyContent: 'center',
+    },
+    clickable: {
+        cursor: 'pointer',
     }
 });
 
@@ -155,4 +166,3 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles as any, { withTheme: true })(TasksTable as any));
-// export default withStyles(styles, { withTheme: true })(SmartTable as any) as any;

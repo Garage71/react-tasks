@@ -1,12 +1,12 @@
 import { Button, FormControl, Input, InputLabel, Paper, Theme, withStyles } from '@material-ui/core';
 import { DateTimePicker } from 'material-ui-pickers';
+import moment from 'moment';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import RichTextEditor, { EditorValue } from 'react-rte';
 import { bindActionCreators, Dispatch} from 'redux';
 import * as ActionCreators from 'src/redux-infrastucture/actions/actions';
 import { ITask } from 'src/redux-infrastucture/store/tasksState';
-
 
 interface IAddNewTaskProps {
   submit: (task: ITask) => void;
@@ -75,23 +75,32 @@ export class AddNewTask extends React.Component<IAddNewTaskProps, IAddNewTaskSta
   private handlePriorityChanged = (event: any) => {
     const { value } = event.target;
     if (!value) {
-      return;
+      this.setState({
+        canSubmit: false,
+      });
     }
     const { task } = this.state;
     this.setState({
       task: {
         ...task,
         priority: value,
-      }
+      },
+      canSubmit: true,
     });
   }
 
   private handleSubmit = () => {
-    this.props.submit(this.state.task);
+    const { task } = this.state;
+    const addedOn = moment(task.addedOn).format("YYYY-MM-DDTHH:mm:ss");
+    const dateTimeToComplete = moment(task.dateTimeToComplete).format("YYYY-MM-DDTHH:mm:ss");
+    const payload = {...task, addedOn, dateTimeToComplete};
+    
+    this.props.submit(payload);
   }
 
-  private handleTimeChanged = (date: Date) => {
+  private handleTimeChanged = (pickedDate: any) => {
     const { task } = this.state;
+    const date = pickedDate.toDate();
     if(date < new Date()) {
       this.setState({
         canSubmit: false,
@@ -103,7 +112,8 @@ export class AddNewTask extends React.Component<IAddNewTaskProps, IAddNewTaskSta
       task: {
         ...task,
         dateTimeToComplete: date,
-      }
+      },
+      canSubmit: true,
     });
   }
 
