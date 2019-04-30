@@ -29,7 +29,7 @@ class Filters extends React.Component<IFiltersProps> {
 		return (
 			<div className={classes.container}>
 				<Button 
-					variant="raised"
+					variant="contained"
 					color={filter === Filter.All ? "primary" : "default"}
 					id={Filter.All.toString()}
 					onClick={() => this.filterClicked(Filter.All)}
@@ -37,7 +37,7 @@ class Filters extends React.Component<IFiltersProps> {
 					All
 				</Button>
 				<Button 
-					variant="raised"
+					variant="contained"
 					color={filter === Filter.Active ? "primary" : "default"}
 					id={Filter.Active.toString()}
 					onClick={() => this.filterClicked(Filter.Active)}
@@ -45,7 +45,7 @@ class Filters extends React.Component<IFiltersProps> {
 					Active
 				</Button>
 				<Button 
-					variant="raised"
+					variant="contained"
 					color={filter === Filter.Completed ? "primary" : "default"}
 					id={Filter.Completed.toString()}
 					onClick={() => this.filterClicked(Filter.Completed)}

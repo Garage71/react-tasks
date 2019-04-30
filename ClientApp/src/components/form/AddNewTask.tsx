@@ -31,13 +31,13 @@ export class AddNewTask extends React.Component<IAddNewTaskProps, IAddNewTaskSta
     this.state = {
       editorValue: RichTextEditor.createEmptyValue(),
       task: {
-          addedOn: this.now,
-          taskId: 0,
-          dateTimeToComplete: finishDate,
-          isActive: true,
-          description: '',
-          priority: 100,
-          name: 'New task',
+        addedOn: this.now,
+        taskId: 0,
+        dateTimeToComplete: finishDate,
+        isActive: true,
+        description: '',
+        priority: 100,
+        name: 'New task',
       },
       canSubmit: true,
       popSnackbar: false,
@@ -54,9 +54,9 @@ export class AddNewTask extends React.Component<IAddNewTaskProps, IAddNewTaskSta
   private setExpiration = () => {
     setTimeout(() => {
       if(this.state.task.dateTimeToComplete < new Date()) {
-          this.setState({
-            canSubmit: false,
-          });
+        this.setState({
+          canSubmit: false,
+        });
       }
     }, 61000);
   }
@@ -196,31 +196,31 @@ export class AddNewTask extends React.Component<IAddNewTaskProps, IAddNewTaskSta
             </div>
           </Paper>
           <Snackbar
-              key={new Date().getTime()}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              open={this.state.popSnackbar}
-              autoHideDuration={6000}
-              onClose={this.closeSnackbar}
-              ContentProps={{
-                'aria-describedby': 'message-id',
-              }}
-              message={
-                <span id="message-id">{`Task '${this.state.task.name}' is created successfully`}</span>
-              }
-              action={
-                <IconButton
-                  key="close"
-                  aria-label="Close"
-                  color="inherit"
-                  className={classes.close}
-                  onClick={this.closeSnackbar}
-                >
-                  <Close />
-                </IconButton>
-              }
+            key={new Date().getTime()}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            open={this.state.popSnackbar}
+            autoHideDuration={6000}
+            onClose={this.closeSnackbar}
+            ContentProps={{
+              'aria-describedby': 'message-id',
+            }}
+            message={
+              <span id="message-id">{`Task '${this.state.task.name}' is created successfully`}</span>
+            }
+            action={
+              <IconButton
+                key="close"
+                aria-label="Close"
+                color="inherit"
+                className={classes.close}
+                onClick={this.closeSnackbar}
+              >
+                <Close />
+              </IconButton>
+            }
           />      
       </div>
     );

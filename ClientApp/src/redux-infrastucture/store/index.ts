@@ -5,9 +5,9 @@ import sagas from '../sagas-middleware/sagas';
 import { initialState } from './initialState';
 
 const composeEnhancers =
-      typeof window === 'object' && window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__']
-        ? window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__']({})
-        : compose;
+  typeof window === 'object' && window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__']
+    ? window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__']({})
+    : compose;
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -17,9 +17,9 @@ const appliedMiddleware = applyMiddleware(...middlewares);
 const enhancer = composeEnhancers(appliedMiddleware);
 
 const store = createStore(
-    rootReducer,
-    initialState as any,
-    enhancer
+  rootReducer,
+  initialState as any,
+  enhancer
 );
 
 sagaMiddleware.run(sagas as any);

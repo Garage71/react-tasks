@@ -46,7 +46,8 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
     const { snackbarShown } = prevState;
 
     if(selectedTaskId && 
-        !snackbarShown &&          
+      !snackbarShown && 
+        selectedTaskId && 
         hashedTasks && 
         Object.keys(hashedTasks).length > 0 && 
         !hashedTasks[selectedTaskId]) {
@@ -103,7 +104,7 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
   }
 
   public render(): JSX.Element {
-    const { choosenTask, classes, tasks, selectedTaskId } = this.props;
+    const { choosenTask, classes, tasks } = this.props;
     const { selectedtaskIsFound, snackbarShown } = this.state;
     const tasksList : ITask[] =  tasks ? tasks : [];
       
@@ -120,7 +121,7 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
           <Filters/>
           <div className={classes.refreshButtonContainer}>
             <Button 
-              variant={'raised'}
+              variant={'contained'}
               className={classes.refreshButton}
               onClick={this.refreshClicked}
             >
@@ -250,7 +251,7 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
               vertical: 'bottom',
               horizontal: 'left',
             }}
-            open={!!selectedTaskId && !selectedtaskIsFound && !snackbarShown}
+            open={!selectedtaskIsFound && !snackbarShown}
             autoHideDuration={6000}
             onClose={this.closeSnackbar}
             ContentProps={{

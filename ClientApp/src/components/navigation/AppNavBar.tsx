@@ -21,81 +21,79 @@ import AddNewTask from '../form/AddNewTask';
 import SmartTable from '../table/TasksTable';
 
 interface IAppDrawerProps {
-    api: IApiState;
-    classes?: any;
+  api: IApiState;
+  classes?: any;
 }
 
 class DrawerWithNavigation extends React.Component<IAppDrawerProps> {
+  private routes = [
+    { path: '/tasks', title: 'Task list', icon: () => <TableChart/> },
+    { path: '/addtask', title: 'Add new task', icon: () => <AddComment/> },        
+  ];
 
-
-    private routes = [
-        { path: '/tasks', title: 'Task list', icon: () => <TableChart/> },
-        { path: '/addtask', title: 'Add new task', icon: () => <AddComment/> },        
-    ];
-
-    private highlightItem  = (route: string, pathname: string) : boolean => {
-        if(pathname === '/') {            
-            return route === '/tasks';
-        }
-
-        if(pathname === route) {
-            return true;
-        }
-
-        if(pathname.indexOf(route) === 0) {
-            return true;
-        }
-
-        return false;
+  private highlightItem  = (route: string, pathname: string) : boolean => {
+    if(pathname === '/') {            
+        return route === '/tasks';
     }
 
-    public render () {
-        const { classes } = this.props;
-        const { pathname } = window.location;
-        return (<div className={classes.root}>
-            <CssBaseline />
-            <AppBar position="fixed" className={classes.appBar}>
-            <Toolbar>
-                <Typography variant="h6" color="inherit" noWrap={true}>
-                    React tasks app
-                </Typography>
-            </Toolbar>
-            </AppBar>
-            <Drawer
-                className={classes.drawer}
-                variant="permanent"
-                classes={{
-                    paper: classes.drawerPaper,
-                }}
-                anchor="left"
-            >
-                <div className={classes.toolbar} />
-                <Divider />
-                <List>
-                    {this.routes.map((route, index) => (
-                        <NavLink key={index} exact={true} activeClassName={classes.current} className={classes.link} to={route.path} >
-                            <ListItem button={true} key={route.title} selected={this.highlightItem(route.path, pathname)}>
-                                <ListItemIcon>{route.icon()}</ListItemIcon>
-                                <ListItemText primary={route.title} />
-                            </ListItem>
-                        </NavLink>
-                    ))}
-                </List>
-            </Drawer>
-            <main className={classes.content}>
-                <div className={classes.toolbar} />
-                <Route path='/' exact={true} component={SmartTable} />
-                <Route path='/:id(\d+)' exact={true} component={SmartTable} />
-                <Route path='/tasks' exact={true} component={SmartTable} />
-                <Route path='/addtask' exact={true} component={AddNewTask} />
-            </main>
-        </div>);
+    if(pathname === route) {
+        return true;
     }
+
+    if(pathname.indexOf(route) === 0) {
+        return true;
+    }
+
+    return false;
+  }
+
+  public render () {
+    const { classes } = this.props;
+    const { pathname } = window.location;
+    return (<div className={classes.root}>
+      <CssBaseline />
+      <AppBar position="fixed" className={classes.appBar}>
+      <Toolbar>
+        <Typography variant="h6" color="inherit" noWrap={true}>
+          React tasks app
+        </Typography>
+      </Toolbar>
+      </AppBar>
+      <Drawer
+          className={classes.drawer}
+          variant="permanent"
+          classes={{
+              paper: classes.drawerPaper,
+          }}
+          anchor="left"
+      >
+        <div className={classes.toolbar} />
+          <Divider />
+          <List>
+            {this.routes.map((route, index) => (
+                <NavLink key={index} exact={true} activeClassName={classes.current} className={classes.link} to={route.path} >
+                    <ListItem button={true} key={route.title} selected={this.highlightItem(route.path, pathname)}>
+                        <ListItemIcon>{route.icon()}</ListItemIcon>
+                        <ListItemText primary={route.title} />
+                    </ListItem>
+                </NavLink>
+            ))}
+          </List>
+      </Drawer>
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
+          <Route path='/' exact={true} component={SmartTable} />
+          <Route path='/:id(\d+)' exact={true} component={SmartTable} />
+          <Route path='/tasks' exact={true} component={SmartTable} />
+          <Route path='/addtask' exact={true} component={AddNewTask} />
+        </main>
+    </div>);
+  }
 }
 
 
 const mapStateToProps = (state: IState): IAppDrawerProps => ({
-    api: state.api,
+  api: state.api,
 });
   
 
