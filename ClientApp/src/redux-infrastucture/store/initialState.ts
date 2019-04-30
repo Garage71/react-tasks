@@ -8,4 +8,5 @@ export const initialState: IState = {
     },
     tasks: [],
     filter: Filter.All,
+    selectedTaskId: null,
 };

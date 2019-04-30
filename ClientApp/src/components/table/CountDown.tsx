@@ -10,7 +10,6 @@ interface ICountDownProps {
     timeToFinish: moment.Moment;
     taskId: number;
     completeTaskAction: (taskId: number) => void;
-    completeSelectedTask: (taskId: number) => void;
     isActive: boolean;
 }
 
@@ -53,7 +52,6 @@ export default class CountDown extends React.Component<ICountDownProps, ICountDo
             });
             clearInterval(this.intervalId);
             this.props.completeTaskAction(taskId);
-            this.props.completeSelectedTask(taskId);
         }
     }
 

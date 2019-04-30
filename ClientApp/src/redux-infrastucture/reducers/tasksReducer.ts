@@ -17,10 +17,11 @@ export default (state: IState, action: Action): IState => {
 
         case ActionType.GET_TASKS_COMPLETE:        
             const payloadTasks: ITask[] = action.payload as ITask[];
-            return {                
+            const newState = {                
                 ...state,
                 tasks: payloadTasks,
             };
+            return newState;
         
         case ActionType.ADD_NEW_TASK_COMPLETE:
             const task: ITask = action.payload as ITask;
@@ -62,6 +63,14 @@ export default (state: IState, action: Action): IState => {
                 ...state,
                 filter,
             };
+
+        case ActionType.SET_SELECTED_TASK_ID: 
+            const selectedTaskId = action.payload as number;
+            return {
+                ...state,
+                selectedTaskId,
+            };
+
         default:
             return initialState;
     }

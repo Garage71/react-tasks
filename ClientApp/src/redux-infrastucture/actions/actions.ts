@@ -63,3 +63,10 @@ export const setFilter = (payload: Filter) : Action<Filter> =>  {
         payload,
     };
 };
+
+export const setSelectedTaskId = (payload: number) : Action<Filter> =>  {
+    return {
+        type: ActionType.SET_SELECTED_TASK_ID,
+        payload,
+    };
+};

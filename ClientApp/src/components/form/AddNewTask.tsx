@@ -77,18 +77,13 @@ export class AddNewTask extends React.Component<IAddNewTaskProps, IAddNewTaskSta
 
   private handlePriorityChanged = (event: any) => {
     const { value } = event.target;
-    if (!value) {
-      this.setState({
-        canSubmit: false,
-      });
-    }
     const { task } = this.state;
     this.setState({
       task: {
         ...task,
         priority: value,
       },
-      canSubmit: true,
+      canSubmit: !!value,
     });
   }
 

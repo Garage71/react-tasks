@@ -6,4 +6,5 @@ export interface IState {
     tasks: ITask[];
     api: IApiState;
     filter: Filter;
+    selectedTaskId: number | null;
 }

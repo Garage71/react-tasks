@@ -7,7 +7,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch} from 'redux';
 import * as ActionCreators from 'src/redux-infrastucture/actions/actions';
-import { filteredTasks, hashMap } from 'src/redux-infrastucture/selectors/selectors';
+import { filteredTasks, hashMap, selectedTask } from 'src/redux-infrastucture/selectors/selectors';
 import { ITask } from 'src/redux-infrastucture/store/tasksState';
 import CountDown from './CountDown';
 import Filters from './Filters';
@@ -20,106 +20,81 @@ interface ISmartTableProps {
   hashedTasks?: object;
   completeTask: (taskId: number) => void;
   removeTask: (taskId: number) => void;
+  setSelectedTaskId: (taskId: number) => void;
+  history?: any;
+  selectedTaskId: number | null;
+  choosenTask: ITask | null;
 }
 
-interface ISmartTableState {
-  selectedTaskId?: number | null;
-  selectedTask: ITask | null;
+interface ISmartTableState {  
   selectedtaskIsFound: boolean;
+  snackbarShown: boolean;
 }
 
 class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
   constructor(props: ISmartTableProps) {
     super(props);
-      this.state = {
-        selectedTask: null,
+      this.state = {        
         selectedtaskIsFound: true,
+        snackbarShown: false,
     };
   }
 
   public static getDerivedStateFromProps(nextProps: ISmartTableProps, prevState: ISmartTableState) : ISmartTableState {
-    const { selectedTaskId , selectedTask } = prevState;
-    const tasksHash = nextProps.hashedTasks as object;
-    const hashIndexes = Object.keys(tasksHash);
-    if(selectedTaskId && !selectedTask && hashIndexes.length > 0) {
-      const hashedTask = tasksHash[selectedTaskId];
-      if(!hashedTask) {
-        return {
-          ...prevState,
-          selectedtaskIsFound: false,
-        };
-      } else {
-        return {
-          ...prevState,
-          selectedTask: hashedTask,
-        };
-      }
-    } else {
-      return prevState;
+    
+    const { selectedTaskId, hashedTasks } = nextProps;
+    const { snackbarShown } = prevState;
+
+    if(selectedTaskId && 
+        !snackbarShown &&          
+        hashedTasks && 
+        Object.keys(hashedTasks).length > 0 && 
+        !hashedTasks[selectedTaskId]) {
+      return {
+        ...prevState,
+        selectedtaskIsFound: false,
+      };
     }
+    return prevState;
   }
 
   public componentDidMount() {
     const { id } = this.props.match.params;
     const { tasks } = this.props;
-    console.log(`Task ID is ${id}`);
-    this.setState({
-      selectedTaskId: id, 
-    });
+    this.props.setSelectedTaskId(id);
     if(tasks && !tasks.length ) {
         this.props.getTasks();
     }
   }
     
   private onRowClick = (e: React.SyntheticEvent<Table>, rowIndex: number) => {
-    const { tasks } = this.props;    
+    const { history, tasks } = this.props;    
     const propsTasks = tasks as ITask[];
     const task =  propsTasks[rowIndex];
     
-    window.location.assign(`/${task.taskId}`);
-  }
+    this.props.setSelectedTaskId(task.taskId);
 
-  private completeSelectedTask = (taskId: number) => {
-    const { selectedTask } = this.state;
-    if(selectedTask) {
-      this.setState({
-        selectedTask: {
-          ...selectedTask,
-          isActive: false,
-        },
-      });
+    if(history) {
+      history.push(`/${task.taskId}`);
     }
   }
-
+  
   private actionClicked = (index: number) => {
     console.log(index);
-    const { selectedTask } = this.state;
     const { tasks } = this.props;
     if(tasks) {
       const task: ITask = tasks[index];
       if(task.isActive) {
         this.props.completeTask(task.taskId);
-        if(selectedTask && selectedTask.taskId === task.taskId) {
-          this.setState({
-            selectedTask: {
-              ...selectedTask,
-              isActive: false,
-            },
-          });
-        }
       } else {
         this.props.removeTask(task.taskId);
-        this.setState({
-          selectedTask: null,
-        });
       }
     }
   }
 
   private closeSnackbar = () => {
     this.setState({
-      selectedtaskIsFound: true,
-      selectedTaskId: null,
+      snackbarShown: true,
     });
   }
 
@@ -128,8 +103,8 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
   }
 
   public render(): JSX.Element {
-    const { classes, tasks } = this.props;
-    const { selectedTask } = this.state;
+    const { choosenTask, classes, tasks, selectedTaskId } = this.props;
+    const { selectedtaskIsFound, snackbarShown } = this.state;
     const tasksList : ITask[] =  tasks ? tasks : [];
       
     return (
@@ -197,7 +172,6 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
                     taskId={tasksList[rowIndex].taskId}
                     timeToFinish={moment(tasksList[rowIndex].dateTimeToComplete)}
                     isActive={tasksList[rowIndex].isActive}
-                    completeSelectedTask={this.completeSelectedTask}
                   />
                 :
                 <span>Completed</span>}
@@ -231,7 +205,7 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
             width={200}
           />
         </Table>
-        {selectedTask &&
+        {choosenTask &&
           <Paper className={classes.taskDetailsContainer}>
             <Typography variant={'h5'} className={classes.taskDetailsHeader}>
               Task Details
@@ -241,31 +215,31 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
                 <span className={classes.taskLabel}>Name</span>
               </Grid>
               <Grid item={true} xs={10}>
-                {selectedTask.name}
+                {choosenTask.name}
               </Grid>
               <Grid item={true} xs={2}>
                 <span className={classes.taskLabel}>Description</span>
               </Grid>
               <Grid item={true} xs={10}>
-                <div dangerouslySetInnerHTML={{__html: selectedTask.description}} />
+                <div dangerouslySetInnerHTML={{__html: choosenTask.description}} />
               </Grid>
               <Grid item={true} xs={2}>
                 <span className={classes.taskLabel}>Status</span>
               </Grid>
               <Grid item={true} xs={10}>
-                {selectedTask.isActive ? 'Active' : 'Completed'}
+                {choosenTask.isActive ? 'Active' : 'Completed'}
               </Grid>
               <Grid item={true} xs={2}>
                 <span className={classes.taskLabel}>Priority</span>
               </Grid>
               <Grid item={true} xs={10}>
-                {selectedTask.priority}
+                {choosenTask.priority}
               </Grid>
               <Grid item={true} xs={2}>
                 <span className={classes.taskLabel}>Added</span>
               </Grid>
               <Grid item={true} xs={10}>
-                {moment(selectedTask.addedOn).format('YYYY-MM-DD HH:mm:ss')}
+                {moment(choosenTask.addedOn).format('YYYY-MM-DD HH:mm:ss')}
               </Grid>
             </Grid>
           </Paper>
@@ -276,14 +250,14 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
               vertical: 'bottom',
               horizontal: 'left',
             }}
-            open={!this.state.selectedtaskIsFound}
+            open={!!selectedTaskId && !selectedtaskIsFound && !snackbarShown}
             autoHideDuration={6000}
             onClose={this.closeSnackbar}
             ContentProps={{
               'aria-describedby': 'message-id',
             }}
             message={
-              <span id="message-id">{`Task ID '${this.state.selectedTaskId}' is not found`}</span>
+              <span id="message-id">{`Task ID '${this.props.selectedTaskId}' is not found`}</span>
             }
             action={
               <IconButton
@@ -355,13 +329,16 @@ const styles = (theme: Theme) => ({
 const mapStateToProps = (state: any) => ({
   tasks: filteredTasks(state),
   hashedTasks: hashMap(state),
+  selectedTaskId: state.tasks.selectedTaskId,
+  choosenTask: selectedTask(state),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>
   bindActionCreators({
     getTasks: ActionCreators.getTasks,
-        removeTask: ActionCreators.removeTaskRequest,
-        completeTask: ActionCreators.completeTaskRequest,
+      removeTask: ActionCreators.removeTaskRequest,
+      completeTask: ActionCreators.completeTaskRequest,
+      setSelectedTaskId: ActionCreators.setSelectedTaskId,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles as any, { withTheme: true })(TasksTable as any));
