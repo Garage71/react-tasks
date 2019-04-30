@@ -7,9 +7,10 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, Dispatch} from 'redux';
 import * as ActionCreators from 'src/redux-infrastucture/actions/actions';
-import hashedTasks from 'src/redux-infrastucture/selectors/selectors';
+import { filteredTasks, hashMap } from 'src/redux-infrastucture/selectors/selectors';
 import { ITask } from 'src/redux-infrastucture/store/tasksState';
 import CountDown from './CountDown';
+import Filters from './Filters';
 
 interface ISmartTableProps {
   classes?: any;
@@ -22,7 +23,6 @@ interface ISmartTableProps {
 }
 
 interface ISmartTableState {
-  filteredTasks: ITask[] | null;
   selectedTaskId?: number | null;
   selectedTask: ITask | null;
   selectedtaskIsFound: boolean;
@@ -32,7 +32,6 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
   constructor(props: ISmartTableProps) {
     super(props);
       this.state = {
-        filteredTasks: null,
         selectedTask: null,
         selectedtaskIsFound: true,
     };
@@ -73,10 +72,9 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
   }
     
   private onRowClick = (e: React.SyntheticEvent<Table>, rowIndex: number) => {
-    const { tasks } = this.props;
-    const { filteredTasks } = this.state;
+    const { tasks } = this.props;    
     const propsTasks = tasks as ITask[];
-    const task = filteredTasks ? filteredTasks[rowIndex] : propsTasks[rowIndex];
+    const task =  propsTasks[rowIndex];
     
     window.location.assign(`/${task.taskId}`);
   }
@@ -125,10 +123,14 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
     });
   }
 
+  private refreshClicked = () => {
+    this.props.getTasks();
+  }
+
   public render(): JSX.Element {
     const { classes, tasks } = this.props;
-    const { filteredTasks, selectedTask } = this.state;
-    const tasksList : ITask[] = filteredTasks ? filteredTasks : (tasks ? tasks : []);
+    const { selectedTask } = this.state;
+    const tasksList : ITask[] =  tasks ? tasks : [];
       
     return (
       <Paper className={classes.container}>
@@ -139,6 +141,18 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
           Task list
         </Typography>
         <br/>
+        <div className={classes.filtersContainer}>
+          <Filters/>
+          <div className={classes.refreshButtonContainer}>
+            <Button 
+              variant={'raised'}
+              className={classes.refreshButton}
+              onClick={this.refreshClicked}
+            >
+              Refresh
+            </Button>
+          </div>
+        </div>
         <Table
           rowHeight={50}
           rowsCount={tasksList.length}
@@ -192,7 +206,11 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
             width={200}
           />
           <Column
-            header={<Cell className={classes.actionButton}>Actions</Cell>}
+            header={
+              <Cell className={classes.actionButton}>
+                Actions
+              </Cell>
+            }
             cell={({rowIndex, ...props}) => {
               const task = tasksList[rowIndex];
               return(
@@ -287,6 +305,7 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
 const styles = (theme: Theme) => ({
   button: {
     marginRight: theme.spacing.unit,
+    width: 118,
   },
   priority: {
     textAlign: 'right',
@@ -322,11 +341,20 @@ const styles = (theme: Theme) => ({
   taskLabel: {
     marginLeft: 20,
   },
+  filtersContainer: {
+    display: 'flex',
+    flexDirection: 'row' as 'row',
+    justifyContent: 'space-between',
+    width: 1086,
+  },
+  refreshButtonContainer: {
+    marginBottom: 15,
+  },
 });
 
 const mapStateToProps = (state: any) => ({
-  tasks: state.tasks.tasks,
-  hashedTasks: hashedTasks(state),
+  tasks: filteredTasks(state),
+  hashedTasks: hashMap(state),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) =>

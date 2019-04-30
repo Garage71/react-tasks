@@ -2,11 +2,12 @@ import { Action } from '../actions/action';
 import * as ActionType from '../actions/actionTypes';
 import { initialState } from '../store/initialState';
 import { IState } from '../store/state';
-import { ITask } from '../store/tasksState';
+import { Filter, ITask } from '../store/tasksState';
 
 export default (state: IState, action: Action): IState => {    
         
     switch(action.type) {
+        case ActionType.GET_TASKS_REQUEST:
         case ActionType.ADD_NEW_TASK_REQUEST:
         case ActionType.COMPLETE_TASK_REQUEST:
         case ActionType.REMOVE_TASK_REQUEST:
@@ -14,7 +15,7 @@ export default (state: IState, action: Action): IState => {
                 ...state,
             };
 
-        case ActionType.GET_TASKS_COMPLETE:
+        case ActionType.GET_TASKS_COMPLETE:        
             const payloadTasks: ITask[] = action.payload as ITask[];
             return {                
                 ...state,
@@ -54,7 +55,13 @@ export default (state: IState, action: Action): IState => {
                 ...state,
                 tasks: filtered,
             };
-            
+        
+        case ActionType.SET_TASKS_FILTER:
+            const filter = action.payload as Filter;
+            return {
+                ...state,
+                filter,
+            };
         default:
             return initialState;
     }

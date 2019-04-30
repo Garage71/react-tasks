@@ -1,4 +1,4 @@
-import { ITask } from '../store/tasksState';
+import { Filter, ITask } from '../store/tasksState';
 import { Action } from './action';
 import * as ActionType from './actionTypes';
 
@@ -53,6 +53,13 @@ export const removeTaskRequest = (payload: number) : Action<number> => {
 export const removeTaskComplete = (payload: number) : Action => {
     return {
         type: ActionType.REMOVE_TASK_COMPLETE,
+        payload,
+    };
+};
+
+export const setFilter = (payload: Filter) : Action<Filter> =>  {
+    return {
+        type: ActionType.SET_TASKS_FILTER,
         payload,
     };
 };

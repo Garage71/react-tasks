@@ -11,4 +11,11 @@ export interface ITask {
 
 export interface ITasks {
     tasks: ITask[];
+    filter: Filter;
+}
+
+export enum Filter {
+    All,
+    Active, 
+    Completed,
 }

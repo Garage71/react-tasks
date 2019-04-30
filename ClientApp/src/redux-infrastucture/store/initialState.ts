@@ -1,4 +1,5 @@
 import { IState } from './state';
+import { Filter } from './tasksState';
 
 export const initialState: IState = {
     api: {
@@ -6,4 +7,5 @@ export const initialState: IState = {
         isOffline: false,
     },
     tasks: [],
+    filter: Filter.All,
 };

@@ -1,7 +1,9 @@
 import { IApiState } from './apiState';
-import { ITask } from './tasksState';
+import { Filter, ITask } from './tasksState';
+
 
 export interface IState {
     tasks: ITask[];
     api: IApiState;
+    filter: Filter;
 }
