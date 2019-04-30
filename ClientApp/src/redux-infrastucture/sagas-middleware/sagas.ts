@@ -5,16 +5,25 @@ import * as Actions from '../actions/actions';
 import * as ActionTypes from '../actions/actionTypes';
 import { ITask } from '../store/tasksState';
 import * as api from './api';
+import MoqServer from './moqServer';
 
 function* getTasks () {
     const result = yield call(api.getTasks);
-    yield put(Actions.setTasks(result.data));
+    if(!result.error) {
+        yield put(Actions.setTasks(result.data));
+    } else {
+        yield put(Actions.setTasks(MoqServer.getTasks()));
+    }
 }
 
 function* addNewTask (action: Action<ITask>) {
-    const { payload } = action;
+    const { payload } = action;    
     const result = yield call(api.createTask, payload as ITask);
-    yield put(Actions.addNewTaskComplete(result.data));
+    if(!result.error) {
+        yield put(Actions.addNewTaskComplete(result.data));
+    } else {
+        yield put(Actions.addNewTaskComplete(MoqServer.addTask(payload as ITask)));
+    }
     return result;
 }
 
