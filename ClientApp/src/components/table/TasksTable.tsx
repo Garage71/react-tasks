@@ -81,7 +81,6 @@ class TasksTable extends React.Component<ISmartTableProps, ISmartTableState> {
   }
   
   private actionClicked = (index: number) => {
-    console.log(index);
     const { tasks } = this.props;
     if(tasks) {
       const task: ITask = tasks[index];

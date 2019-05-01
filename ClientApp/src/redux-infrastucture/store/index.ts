@@ -1,6 +1,7 @@
 import { applyMiddleware, compose, createStore, Middleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import rootReducer from '../reducers';
+import realtimeSagas from '../sagas-middleware/realtimeSagas';
 import sagas from '../sagas-middleware/sagas';
 import { initialState } from './initialState';
 
@@ -22,6 +23,7 @@ const store = createStore(
   enhancer
 );
 
-sagaMiddleware.run(sagas as any);
+sagaMiddleware.run(sagas);
+sagaMiddleware.run(realtimeSagas);
 
 export default store;

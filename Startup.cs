@@ -9,6 +9,8 @@ using react_todo.Contracts;
 using react_todo.Services.Factories;
 using react_todo.Services.Repositories;
 using Microsoft.AspNetCore.Mvc.Formatters.Json;
+using react_todo.Services.EventAggregator;
+using react_todo.Hubs;
 
 namespace react_todo
 {
@@ -26,7 +28,12 @@ namespace react_todo
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddScoped<IRepositoryContextFactory, RepositoryContextFactory>();
-            services.AddScoped<ITasksRepository>(provider => new TaskRepository(Configuration.GetConnectionString("DefaultConnection"), provider.GetService<IRepositoryContextFactory>()));
+            services.AddSingleton<IEventAggregator, EventAggregator>();
+            services.AddScoped<ITasksRepository>(provider => new TaskRepository(
+                Configuration.GetConnectionString("DefaultConnection"),
+                provider.GetService<IRepositoryContextFactory>(),
+                provider.GetService<IEventAggregator>()
+                ));
             
 
             // In production, the React files will be served from this directory
@@ -34,6 +41,8 @@ namespace react_todo
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,6 +62,11 @@ namespace react_todo
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<TaskHub>("/taskhub");
+            });
 
             app.UseMvc(routes =>
             {

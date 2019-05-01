@@ -4,15 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using react_todo.Contracts;
+using react_todo.Services.EventAggregator;
 using Task = react_todo.Models.Task;
 
 namespace react_todo.Services.Repositories
 {
     public class TaskRepository : BaseRepository, ITasksRepository
     {
-        public TaskRepository(string connectionString, IRepositoryContextFactory contextFactory) : base(connectionString, contextFactory)
+        private readonly IEventAggregator eventAggregator;
+        public TaskRepository(string connectionString, IRepositoryContextFactory contextFactory, IEventAggregator eventAggregator) : base(connectionString, contextFactory)
         {
-
+            this.eventAggregator = eventAggregator;
         }
         public async Task<List<Task>> GetTasks()
         {
@@ -34,6 +36,7 @@ namespace react_todo.Services.Repositories
             {
                 var newTask = context.Tasks.Add(task);
                 var result = await context.SaveChangesAsync();
+                eventAggregator.Publish(new TaskMessage { Type = MessageType.Create, Task = task } );
                 return task;
             }
         }
@@ -55,6 +58,7 @@ namespace react_todo.Services.Repositories
                 {
                     task.IsActive = false;
                     await context.SaveChangesAsync();
+                    eventAggregator.Publish(new TaskMessage { Type = MessageType.Complete, Task = task });
                     return true;
                 }
                 return false;
@@ -68,6 +72,7 @@ namespace react_todo.Services.Repositories
                 var task = await context.Tasks.FindAsync(taskId);
                 if (task != null)
                 {
+                    eventAggregator.Publish(new TaskMessage { Type = MessageType.Remove, Task = task });
                     context.Tasks.Remove(task);
                     await context.SaveChangesAsync();
                     return true;

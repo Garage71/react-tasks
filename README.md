@@ -7,6 +7,7 @@
 - Material-UI components library
 - Redux state machine with redux-saga asynchronous middleware
 - .Net Core 2.2 based backend with Entity Framework
+- Realtime client data update from server via SignalR mechanism
 - Mocked/Fake server api is availabe to the client
 
 ### Deploy instructions

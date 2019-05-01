@@ -26,7 +26,10 @@ export default (state: IState, action: Action): IState => {
     case ActionType.ADD_NEW_TASK_COMPLETE:
       const task: ITask = action.payload as ITask;
       const newTasks = [...state.tasks];
-      newTasks.push(task);
+      const exists = newTasks.find(t => t.taskId === task.taskId);
+      if(!exists) {
+        newTasks.push(task);
+      }
       return {
           ...state,
           tasks: newTasks,
@@ -46,7 +49,7 @@ export default (state: IState, action: Action): IState => {
       }
       return {
           ...state,
-          tasks: filtered,
+          tasks: [...filtered],
       };
 
     case ActionType.REMOVE_TASK_COMPLETE:
